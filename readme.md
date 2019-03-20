@@ -3,6 +3,8 @@
 * [2. How is it working?](#2-how-is-it-working?)
 * [2.1 Architecture](#21-architecture)
 * [2.2 Data Flow](#22-data-flow)
+* [3. Internal Api](#3-internal-api)
+* [3.1 Frontend - Backend](#1-frontend-backend)
 
 # 1. About
 
@@ -11,7 +13,7 @@ Screen Ape is a tool for creating dynamic pages, which will serve as a screen. N
 It should help creating applications for read only presentations on tv screens.
 
 # 2. How is it working?
-# 2.1 Architecture
+## 2.1 Architecture
 ![Architecture](./docs/images/architecture.png)
 
 This project is splitted in three parts:
@@ -19,18 +21,25 @@ This project is splitted in three parts:
 - gateway
 - backend client
 
-# 2.1.1 Gateway
+### 2.1.1 Gateway
 
 Gateway is responsible for pushing the data from frontend to the backend and from backend to frontend.
 
-# 2.1.2 Frontend Client
+### 2.1.2 Frontend Client
 
 Frontend Client is resposible for connecting and communication to Gateway thru websocket.
 
-# 2.1.2 Backend Client
+### 2.1.2 Backend Client
 
 Backend Client is responsible for connecting and communication to Gateway thru RabbitMQ.
 
-# 2.2 Data Flow
+### 2.2 Data Flow
 
 Frontend can send data to the Backend, but it also needs to react on the actions which the backend is sending. Backend can target certain browser.
+
+# 3. Internal Api
+
+## 3.1 Frontend - Backend
+
+### 3.1.1 Connection - Handshake
+
