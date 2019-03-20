@@ -6,6 +6,8 @@ services:
     env_file: .env
     volumes:
       - ./gateway/code:/code
+    ports:
+      - 80:${TORNADO_PORT}
 
   mq:
     image: rabbitmq:3-management

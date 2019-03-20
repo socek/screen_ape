@@ -30,5 +30,5 @@ RUN pipenv install
 COPY --chown=user:user code $APP_DIR
 RUN pipenv run python setup.py develop
 
-CMD pipenv run python run.py
+CMD pipenv run python start.py
 EXPOSE 18765

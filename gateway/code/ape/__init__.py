@@ -1,3 +1,3 @@
-from ape.app import ScreenApeConfigurator
+from ape.application import ScreenApeConfigurator
 
 app = ScreenApeConfigurator()
