@@ -49,7 +49,6 @@ class PikaPlugin(object):
         This method will be called when the Configurator will be used as context
         manager. This is the enter phase.
         """
-        print("\t\t <<< Enter Pika?")
         context.pika = self.pika
         context.rabbit = self.pika.channel
 

@@ -1,7 +1,6 @@
 from uuid import uuid4
 
 from tornado.websocket import WebSocketHandler
-from sapp.decorators import WithContext
 
 from ape import app
 
@@ -15,22 +14,17 @@ class Screen(object):
         self._id = uuid4()
 
     def create_queue(self):
-        print("R", id(app))
-        with app as ctx:
-            print("A", ctx)
-            rabbit = ctx.rabbit
+        with app('rabbit') as rabbit:
             rabbit.queue_declare(queue=self.queue, exclusive=True)
-            print("B")
             self.publish()
-            print("C")
 
-    @WithContext(app, args=["rabbit"])
-    def destroy_queue(self, rabbit):
-        rabbit.queue_delete(queue=self.queue)
+    def destroy_queue(self):
+        with app('rabbit') as rabbit:
+            rabbit.queue_delete(queue=self.queue)
 
-    @WithContext(app, args=["rabbit"])
-    def publish(self, rabbit):
-        rabbit.basic_publish(exchange="", routing_key=self.queue, body="Hello World!")
+    def publish(self):
+        with app('rabbit') as rabbit:
+            rabbit.basic_publish(exchange="", routing_key=self.queue, body="Hello World!")
 
 
 class ScreenHandler(WebSocketHandler):

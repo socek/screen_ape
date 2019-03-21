@@ -6,6 +6,7 @@ from tornado.ioloop import IOLoop
 from ape.plugins.ppika import PikaPlugin
 from ape.plugins.ptornado import TornadoPlugin
 
+
 class FragmentContext(object):
     def __init__(self, configurator, args):
         self.configurator = configurator
@@ -13,7 +14,12 @@ class FragmentContext(object):
 
     def __enter__(self):
         ctx = self.configurator.__enter__()
-        return [ getattr(ctx, arg) for arg in self.args ]
+        if len(self.args) == 0:
+            return None
+        elif len(self.args) == 1:
+            return getattr(ctx, self.args[0])
+        else:
+            return [getattr(ctx, arg) for arg in self.args]
 
     def __exit__(self, *args, **kwargs):
         ctx = self.configurator.__exit__(*args, **kwargs)
@@ -23,7 +29,6 @@ class ScreenApeConfigurator(Configurator):
     def __init__(self):
         super().__init__()
         self.io_loop = IOLoop.instance()
-        print('init', id(self))
 
     def append_plugins(self):
         self.add_plugin(SettingsPlugin("ape.settings"))
@@ -42,5 +47,5 @@ class ScreenApeConfigurator(Configurator):
     def __enter__(self):
         return self.create_context()
 
-    def __call__(self, args):
+    def __call__(self, *args):
         return FragmentContext(self, args)

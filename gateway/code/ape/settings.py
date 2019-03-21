@@ -35,6 +35,7 @@ def logging(settings):
 
 
 def tornado(settings):
+    settings["debug"] = config("DEBUG", False, bool)
     settings["tornado_port"] = config("TORNADO_PORT", 18765)
 
 
