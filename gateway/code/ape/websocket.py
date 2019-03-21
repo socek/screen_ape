@@ -2,7 +2,9 @@ from uuid import uuid4
 
 from tornado.websocket import WebSocketHandler
 
-from ape import app
+from ape.drivers.mq import backend
+from ape.drivers.mq import queue
+from ape.drivers.ws import WebsocketCommand
 
 
 class Screen(object):
@@ -13,35 +15,26 @@ class Screen(object):
     def __init__(self):
         self._id = uuid4()
 
-    def create_queue(self):
-        with app('rabbit') as rabbit:
-            rabbit.queue_declare(queue=self.queue, exclusive=True)
-            self.publish()
-
-    def destroy_queue(self):
-        with app('rabbit') as rabbit:
-            rabbit.queue_delete(queue=self.queue)
-
-    def publish(self):
-        with app('rabbit') as rabbit:
-            rabbit.basic_publish(exchange="", routing_key=self.queue, body="Hello World!")
-
 
 class ScreenHandler(WebSocketHandler):
+    @property
+    def command(self):
+        return WebsocketCommand(self)
+
     def open(self):
         self.screen = Screen()
         print("Screen connected: {}".format(self.screen._id))
-        self.screen.create_queue()
+        queue.create_queue_for_screen(self.screen)
 
         print("Sending hello")
-        self.write_message(u"Hellow")
+        self.command.send({"msg": "hello"})
 
     def on_message(self, message):
-        self.write_message(u"You said: " + message)
+        pass
 
     def on_close(self):
         print("WebSocket closed")
-        self.screen.destroy_queue()
+        queue.destroy_queue(self.screen)
 
     def check_origin(self, origin):
         """

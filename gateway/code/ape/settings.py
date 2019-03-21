@@ -45,3 +45,5 @@ def rabbit(settings):
     settings["rabbit_user"] = config("RABBIT_USER", "guest")
     settings["rabbit_password"] = config("RABBIT_PASSWORD", "guest")
     settings["pika_io_loop_timeout"] = config("PIKA_IO_LOOP_TIMEOUT", 500, int)
+
+    settings["backend_queue"] = config("BACKEND_QUEUE", "backend")
