@@ -1,5 +1,6 @@
 from logging import getLogger
 from uuid import uuid4
+from json import loads
 
 from tornado.websocket import WebSocketHandler
 
@@ -12,46 +13,70 @@ log = getLogger(__name__)
 
 class Screen(object):
     @property
+    def _queue(self):
+        return ScreenQueueCommand(self)
+
+    @property
+    def _screen(self):
+        return WebsocketCommand(self.handler)
+
+    @property
     def queue(self):
+        return self.id
+
+    @property
+    def id(self):
         return self._id.hex
 
-    def __init__(self):
+    def __init__(self, handler):
         self._id = uuid4()
+        self.handler = handler
+
+    def initialize(self):
+        self._queue.create_queue()
+
+    def send_handshake(self):
+        self._screen.send({
+            "type": "handshake",
+            "body": {
+                "screen_id": self.id,
+            }})
+
+    def consumer(self, channel, method, properties, body):
+        data = loads(body)
+        self._screen.send({
+            "type": "command",
+            "body": data})
 
 
 class ScreenHandler(WebSocketHandler):
     @property
-    def _screen(self):
-        return WebsocketCommand(self)
-
-    @property
     def _backend(self):
         return BackendCommand()
 
-    @property
-    def _screen_queue(self):
-        return ScreenQueueCommand(self.screen)
-
-
     def open(self):
-        self.screen = Screen()
+        self.screen = Screen(self)
         log.info("Screen connected: {}".format(self.screen._id))
-        self._screen_queue.create_queue()
-        self._backend.create_queue()
+        self.screen.initialize()
+        self.backend_initialize()
 
         log.info("Sending handshake")
-        self._screen.send({"msg": "hello"})
-        self._backend.send_message({"msg": "hello"})
+        self.screen.send_handshake()
 
     def on_message(self, message):
-        pass
+        message = loads(message)
+        message["screen_id"] = self.screen.id
+        self._backend.send_message(message)
 
     def on_close(self):
         log.info("Screen disconnected")
-        self._screen_queue.destroy_queue(self.screen)
+        self._screen_queue.destroy_queue()
 
     def check_origin(self, origin):
         """
         Override the origin check if needed
         """
         return True
+
+    def backend_initialize(self):
+        self._backend.create_queue()

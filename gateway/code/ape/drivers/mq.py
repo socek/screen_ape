@@ -16,8 +16,10 @@ class ScreenQueueCommand(object):
         """
         Create queue for screen. This queue is for all messages that will be send to the screen.
         """
+        queue = self.screen.queue
         with app("rabbit") as rabbit:
-            rabbit.queue_declare(queue=self.screen.queue, exclusive=True)
+            rabbit.queue_declare(queue=queue, exclusive=True)
+            rabbit.basic_consume(queue, self.screen.consumer)
 
     def destroy_queue(self):
         """
