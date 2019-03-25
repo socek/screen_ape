@@ -36,8 +36,6 @@ class PikaClient(object):
         """
         log.info("Succesfully connected to rabbitmq")
         self.channel = connection.channel()
-        # TODO: find proper way to declarate queue
-        # self.channel.queue_declare(queue=self.settings["backend_queue"])
 
 
 class PikaPlugin(object):

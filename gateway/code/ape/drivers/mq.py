@@ -1,4 +1,5 @@
 from ape import app
+from json import dumps
 
 
 class ScreenQueueCommand(object):
@@ -8,27 +9,30 @@ class ScreenQueueCommand(object):
 
     _EXCHANGE = ""
 
-    def create_queue_for_screen(self, screen):
+    def __init__(self, screen):
+        self.screen = screen
+
+    def create_queue(self):
         """
         Create queue for screen. This queue is for all messages that will be send to the screen.
         """
         with app("rabbit") as rabbit:
-            rabbit.queue_declare(queue=screen.queue, exclusive=True)
+            rabbit.queue_declare(queue=self.screen.queue, exclusive=True)
 
-    def destroy_queue(self, screen):
+    def destroy_queue(self):
         """
         Destroy queue which was used for screen.
         """
         with app("rabbit") as rabbit:
-            rabbit.queue_delete(queue=screen.queue)
+            rabbit.queue_delete(queue=self.screen.queue)
 
-    def send_message(self, screen, message):
+    def send_message(self, message):
         """
         Send message to the screen.
         """
         with app("rabbit") as rabbit:
             rabbit.basic_publish(
-                exchange=self._EXCHANGE, routing_key=screen.queue, body=message
+                exchange=self._EXCHANGE, routing_key=self.screen.queue, body=message
             )
 
 
@@ -44,12 +48,12 @@ class BackendCommand(object):
         with app("settings") as settings:
             return settings["backend_queue"]
 
+    def create_queue(self):
+        with app("rabbit") as rabbit:
+            rabbit.queue_declare(queue="backend")
+
     def send_message(self, message):
         with app("rabbit") as rabbit:
             rabbit.basic_publish(
-                exchange=self._EXCHANGE, routing_key=self.queue, body=message
+                exchange=self._EXCHANGE, routing_key=self.queue, body=dumps(message)
             )
-
-
-queue = ScreenQueueCommand()
-backend = BackendCommand()

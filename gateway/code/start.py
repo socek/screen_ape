@@ -1,6 +1,5 @@
 from ape import app
 from ape.websocket import ScreenHandler
-from ape.drivers.mq import backend
 
 from logging import getLogger
 

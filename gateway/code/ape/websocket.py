@@ -1,10 +1,10 @@
-from uuid import uuid4
 from logging import getLogger
+from uuid import uuid4
 
 from tornado.websocket import WebSocketHandler
 
-from ape.drivers.mq import backend
-from ape.drivers.mq import queue
+from ape.drivers.mq import BackendCommand
+from ape.drivers.mq import ScreenQueueCommand
 from ape.drivers.ws import WebsocketCommand
 
 log = getLogger(__name__)
@@ -21,23 +21,34 @@ class Screen(object):
 
 class ScreenHandler(WebSocketHandler):
     @property
-    def command(self):
+    def _screen(self):
         return WebsocketCommand(self)
+
+    @property
+    def _backend(self):
+        return BackendCommand()
+
+    @property
+    def _screen_queue(self):
+        return ScreenQueueCommand(self.screen)
+
 
     def open(self):
         self.screen = Screen()
         log.info("Screen connected: {}".format(self.screen._id))
-        queue.create_queue_for_screen(self.screen)
+        self._screen_queue.create_queue()
+        self._backend.create_queue()
 
         log.info("Sending handshake")
-        self.command.send({"msg": "hello"})
+        self._screen.send({"msg": "hello"})
+        self._backend.send_message({"msg": "hello"})
 
     def on_message(self, message):
         pass
 
     def on_close(self):
         log.info("Screen disconnected")
-        queue.destroy_queue(self.screen)
+        self._screen_queue.destroy_queue(self.screen)
 
     def check_origin(self, origin):
         """
