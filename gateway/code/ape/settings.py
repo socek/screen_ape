@@ -1,4 +1,6 @@
 from decouple import config
+from logging import INFO
+from logging import getLogger
 from sapp.plugins.settings import PrefixedStringsDict
 
 
@@ -11,11 +13,15 @@ def default():
 
 
 def logging(settings):
+    formatter = config("LOGGING_FORMATTER", "descriptive")
     settings["logging"] = {
         "version": 1,
         "disable_existing_loggers": True,
         "formatters": {
             "generic": {
+                "format": "%(message)s"
+            },
+            "descriptive": {
                 "format": "%(asctime)s %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s"
             }
         },
@@ -23,13 +29,14 @@ def logging(settings):
             "console": {
                 "level": "DEBUG",
                 "class": "logging.StreamHandler",
-                "formatter": "generic",
+                "formatter": formatter,
             }
         },
         "loggers": {
-            "root": {"level": "DEBUG", "handlers": ["console"]},
-            "ape": {"level": "DEBUG", "handlers": ["console"]},
-            "tornado": {"level": "DEBUG", "handlers": ["console"]},
+            "": {"level": "DEBUG", "handlers": ["console"]},
+            "ape": {"level": "DEBUG", "handlers": []},
+            "tornado": {"level": "DEBUG", "handlers": []},
+            "pika": {"level": "CRITICAL", "handlers": []},
         },
     }
 

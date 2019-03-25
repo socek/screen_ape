@@ -1,1 +1,3 @@
 MQ_HOST=mq
+#generic # one of "generic" or "descriptive"
+LOGGING_FORMATTER=generic

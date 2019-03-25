@@ -1,19 +1,24 @@
+from logging import getLogger
+
 from pika import ConnectionParameters
 from pika import PlainCredentials
 from pika.adapters.tornado_connection import TornadoConnection
+
+log = getLogger(__name__)
 
 
 class PikaClient(object):
     def __init__(self, app):
         self.app = app
+        self.settings = self.app.settings
         self.channel = None
 
     def connect(self):
-        print("Connecting to RabbitMQ...")
-        host = self.app.settings["rabbit_host"]
-        port = self.app.settings["rabbit_port"]
-        user = self.app.settings["rabbit_user"]
-        password = self.app.settings["rabbit_password"]
+        log.info("Connecting to RabbitMQ...")
+        host = self.settings["rabbit_host"]
+        port = self.settings["rabbit_port"]
+        user = self.settings["rabbit_user"]
+        password = self.settings["rabbit_password"]
 
         try:
             credentials = PlainCredentials(user, password)
@@ -23,12 +28,16 @@ class PikaClient(object):
                 param, on_open_callback=self.on_connected
             )
         except Exception as e:
-            print("Something went wrong... %s", e)
+            log.error("Something went wrong with connection to RabbitMQ... %s", e)
 
     def on_connected(self, connection):
-        """When we are completely connected to rabbitmq this is called"""
-        print("Succesfully connected to rabbitmq")
+        """
+        When we are completely connected to rabbitmq this is called
+        """
+        log.info("Succesfully connected to rabbitmq")
         self.channel = connection.channel()
+        # TODO: find proper way to declarate queue
+        # self.channel.queue_declare(queue=self.settings["backend_queue"])
 
 
 class PikaPlugin(object):

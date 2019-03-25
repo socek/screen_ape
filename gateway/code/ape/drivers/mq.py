@@ -44,10 +44,6 @@ class BackendCommand(object):
         with app("settings") as settings:
             return settings["backend_queue"]
 
-    def create_queue(self):
-        with app("rabbit") as rabbit:
-            rabbit.queue_declare(queue=self.queue)
-
     def send_message(self, message):
         with app("rabbit") as rabbit:
             rabbit.basic_publish(
