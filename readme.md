@@ -3,8 +3,7 @@
 * [2. How is it working?](#2-how-is-it-working?)
 * [2.1 Architecture](#21-architecture)
 * [2.2 Data Flow](#22-data-flow)
-* [3. Internal Api](#3-internal-api)
-* [3.1 Frontend - Backend](#1-frontend-backend)
+* [3. Protocols](docs/protocols/v1_0.md#3-protocols)
 
 # 1. About
 
@@ -36,10 +35,4 @@ Backend Client is responsible for connecting and communication to Gateway thru R
 ### 2.2 Data Flow
 
 Frontend can send data to the Backend, but it also needs to react on the actions which the backend is sending. Backend can target certain browser.
-
-# 3. Internal Api
-
-## 3.1 Frontend - Backend
-
-### 3.1.1 Connection - Handshake
 
