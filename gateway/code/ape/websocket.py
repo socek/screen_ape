@@ -1,76 +1,46 @@
+from json import loads
 from logging import getLogger
 from uuid import uuid4
-from json import loads
 
 from tornado.websocket import WebSocketHandler
 
+from ape.browser import Browser
 from ape.drivers.mq import BackendCommand
-from ape.drivers.mq import ScreenQueueCommand
-from ape.drivers.ws import WebsocketCommand
 
 log = getLogger(__name__)
 
 
-class Screen(object):
-    @property
-    def _queue(self):
-        return ScreenQueueCommand(self)
-
-    @property
-    def _screen(self):
-        return WebsocketCommand(self.handler)
-
-    @property
-    def queue(self):
-        return self.id
-
-    @property
-    def id(self):
-        return self._id.hex
-
-    def __init__(self, handler):
-        self._id = uuid4()
-        self.handler = handler
-
-    def initialize(self):
-        self._queue.create_queue()
-
-    def send_handshake(self):
-        self._screen.send({
-            "type": "handshake",
-            "body": {
-                "screen_id": self.id,
-            }})
-
-    def consumer(self, channel, method, properties, body):
-        data = loads(body)
-        self._screen.send({
-            "type": "command",
-            "body": data})
-
-
-class ScreenHandler(WebSocketHandler):
+class BrowserHandler(WebSocketHandler):
     @property
     def _backend(self):
         return BackendCommand()
 
     def open(self):
-        self.screen = Screen(self)
-        log.info("Screen connected: {}".format(self.screen._id))
-        self.screen.initialize()
+        """
+        Method is called when new websocket connection is established.
+        """
+        self.browser = Browser(self)
+        log.info("{}: Browser connected".format(self.browser.id))
+        self.browser.initialize()
         self.backend_initialize()
 
-        log.info("Sending handshake")
-        self.screen.send_handshake()
+        log.info("{}: Sending handshake".format(self.browser.id))
+        self.browser.send_handshake()
 
     def on_message(self, message):
+        """
+        Method is called when new data arrived from websocket (Browser)
+        """
         message = loads(message)
-        message["screen_id"] = self.screen.id
+        message["browser_id"] = self.browser.id
         self._backend.send_message(message)
 
     def on_close(self):
-        log.info("Screen disconnected")
-        self._screen_queue.destroy_queue()
+        """
+        Method is called when Browser is disconnected.
+        """
+        log.info("{}: Browser disconnected".format(self.browser.id))
+        self.browser.on_close()
 
     def check_origin(self, origin):
         """
@@ -79,4 +49,7 @@ class ScreenHandler(WebSocketHandler):
         return True
 
     def backend_initialize(self):
+        """
+        Ensure that the backend queue is created.
+        """
         self._backend.create_queue()

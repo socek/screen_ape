@@ -1,5 +1,5 @@
 from ape import app
-from ape.websocket import ScreenHandler
+from ape.websocket import BrowserHandler
 
 from logging import getLogger
 
@@ -7,7 +7,7 @@ from logging import getLogger
 
 def start():
     app.start("default")
-    app.tornado.add_handlers(".*", [(r"/", ScreenHandler, {})])
+    app.tornado.add_handlers(".*", [(r"/", BrowserHandler, {})])
     app.run_io_loop()
 
 

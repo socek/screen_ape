@@ -2,39 +2,39 @@ from ape import app
 from json import dumps
 
 
-class ScreenQueueCommand(object):
+class BrowserQueueCommand(object):
     """
-    Commands responsible for managing messages to the screen.
+    Commands responsible for managing messages to the browser.
     """
 
     _EXCHANGE = ""
 
-    def __init__(self, screen):
-        self.screen = screen
+    def __init__(self, browser):
+        self.browser = browser
 
     def create_queue(self):
         """
-        Create queue for screen. This queue is for all messages that will be send to the screen.
+        Create queue for the Browser. This queue is for all messages that will be send to the browser.
         """
-        queue = self.screen.queue
+        queue = self.browser.queue_name
         with app("rabbit") as rabbit:
             rabbit.queue_declare(queue=queue, exclusive=True)
-            rabbit.basic_consume(queue, self.screen.consumer)
+            rabbit.basic_consume(queue, self.browser.consumer)
 
     def destroy_queue(self):
         """
-        Destroy queue which was used for screen.
+        Destroy queue which was used for the Browser.
         """
         with app("rabbit") as rabbit:
-            rabbit.queue_delete(queue=self.screen.queue)
+            rabbit.queue_delete(queue=self.browser.queue_name)
 
     def send_message(self, message):
         """
-        Send message to the screen.
+        Send message to the Browser.
         """
         with app("rabbit") as rabbit:
             rabbit.basic_publish(
-                exchange=self._EXCHANGE, routing_key=self.screen.queue, body=message
+                exchange=self._EXCHANGE, routing_key=self.browser.queue_name, body=message
             )
 
 

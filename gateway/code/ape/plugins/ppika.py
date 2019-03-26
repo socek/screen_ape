@@ -36,6 +36,7 @@ class PikaClient(object):
         """
         log.info("Succesfully connected to rabbitmq")
         self.channel = connection.channel()
+        log.info("Awaiting for websocket connections...")
 
 
 class PikaPlugin(object):
