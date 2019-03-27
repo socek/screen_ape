@@ -1,9 +1,12 @@
-## Table of contents
-* [1. About](#1-about)
-* [2. How is it working?](#2-how-is-it-working?)
-* [2.1 Architecture](#21-architecture)
-* [2.2 Data Flow](#22-data-flow)
-* [3. Protocols](docs/protocols/v1_0.md#3-protocols)
+# Table of contents
+
+* Main
+  * [1. About](#1-about)
+  * [2. How is it working?](#2-how-is-it-working?)
+  * [2.1 Architecture](#21-architecture)
+  * [2.2 Data Flow](#22-data-flow)
+* Protocols Documentation
+  * [v1.0](docs/protocols/v1_0.md#v10)
 
 # 1. About
 
