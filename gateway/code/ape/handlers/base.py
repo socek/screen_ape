@@ -1,7 +1,14 @@
-class BrowserReactionHandler(object):
-    typename = None
+from logging import getLogger
 
-    def __init__(self, message, browser):
+
+log = getLogger(__name__)
+
+
+class BaseHandler(object):
+    typename = None
+    groupname = None
+
+    def __init__(self, browser, message):
         self.message = message
         self.browser = browser
 
@@ -13,10 +20,17 @@ class BrowserReactionHandler(object):
     def _socket(self):
         return self.browser._socket
 
+    @property
+    def _backend(self):
+        return self.browser._backend
+
     def _is_proper_handler(self):
         return self.typename == self.message["type"]
 
-    def react(self):
-        raise NotImplemented()
+    def _handle(self):
+        pass
 
-
+    def handle(self):
+        for result in self._handle():
+            result.initalize(self.browser)
+            result.send()

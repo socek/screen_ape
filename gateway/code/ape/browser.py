@@ -5,7 +5,7 @@ from uuid import uuid4
 from ape.drivers.mq import BackendCommand
 from ape.drivers.mq import BrowserQueueCommand
 from ape.drivers.ws import WebsocketCommand
-from ape.handlers import HandlerPicker
+from ape.handlers import ActionHandlerPicker
 
 log = getLogger(__name__)
 
@@ -29,7 +29,7 @@ class Browser(object):
 
     @property
     def _socket(self):
-        return WebsocketCommand(self.handler)
+        return WebsocketCommand(self.connection)
 
     @property
     def _backend(self):
@@ -52,7 +52,8 @@ class Browser(object):
         """
         React on new data received from the Browser queue.
         """
-        pass
+        data = loads(body)
+        self._socket.send({"type": "command", "body": data})
 
     def on_socket_disconnection(self):
         """
@@ -65,6 +66,4 @@ class Browser(object):
         """
         Method is called when new data arrived from websocket (Browser)
         """
-        message = loads(message)
-        handler = HandlerPicker(self, message)
-        handler.react()
+        ActionHandlerPicker(self, loads(message)).handle()

@@ -16,12 +16,6 @@ class WebsocketCommand(object):
     def _write(self, *args, **kwargs):
         return self.handler.write_message(*args, **kwargs)
 
-    def _send(self, data):
+    def send(self, data):
         self._write(dumps(data))
 
-    def handshake(self, _id):
-        log.info("{}: Sending handshake".format(_id))
-        self._send({"type": "handshake", "result": "ok", "screen_id": _id})
-
-    def consume_command(self, message):
-        self._send({"type": "command", "body": message})
