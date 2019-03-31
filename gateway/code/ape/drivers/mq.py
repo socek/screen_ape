@@ -16,7 +16,7 @@ class BrowserQueueCommand(object):
         """
         Create queue for the Browser. This queue is for all messages that will be send to the browser.
         """
-        queue = self.browser.queue_name
+        queue = self.browser.session.id.hex
         with app("rabbit") as rabbit:
             rabbit.queue_declare(queue=queue, exclusive=True)
             rabbit.basic_consume(queue, self.browser.consumer)
@@ -26,7 +26,7 @@ class BrowserQueueCommand(object):
         Destroy queue which was used for the Browser.
         """
         with app("rabbit") as rabbit:
-            rabbit.queue_delete(queue=self.browser.queue_name)
+            rabbit.queue_delete(queue=self.browser.session.id.hex)
 
     def send_message(self, message):
         """

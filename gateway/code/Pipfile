@@ -8,6 +8,7 @@ sapp = "==0.1"
 python-decouple = "*"
 tornado = "*"
 pika = "*"
+ipython = "*"
 
 [dev-packages]
 ipython = "*"
