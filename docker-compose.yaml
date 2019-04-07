@@ -1,16 +1,43 @@
 version: '3.7'
 
 services:
+  traefik:
+    image: traefik # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+    ports:
+      - "80:80"     # The HTTP port
+      - "8080:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+
   gateway:
     build: gateway
     env_file: .env
     volumes:
       - ./gateway/code:/code
-    ports:
-      - 80:${TORNADO_PORT}
+    labels:
+      - "traefik.frontend.rule=Host:localhost;PathPrefixStrip:/gateway"
+      - "traefik.port=${TORNADO_PORT:-18765}"
+      - "traefik.enable=true"
+      # - "traefik.frontend.rule=Host:localhost"
+
+  frontend:
+    build:
+      context: frontend
+      target: dev
+    env_file: .env
+    volumes:
+      - ./frontend/code:/code
+    labels:
+      - "traefik.frontend.rule=Host:localhost;PathPrefix:/"
+      - "traefik.enable=true"
+      - "traefik.port=8080"
+      # - "traefik.frontend.rule=Host:localhost"
 
   mq:
     image: rabbitmq:3-management
     ports:
-      - 15672:15672
+      - "15672:15672"
+    labels:
+      - "traefik.enable=false"
 
