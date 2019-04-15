@@ -1,4 +1,6 @@
 <script>
+import uuidv4 from 'uuid/v4'
+
 export const Statuses = {
   NOT_CONNECTED: 0,
   CONNECTING: 1,
@@ -65,7 +67,9 @@ class MessageHandler {
 export let ScreenApe = {
   data () {
     return {
-      status: Statuses.NOT_CONNECTED
+      status: Statuses.NOT_CONNECTED,
+      Statuses: Statuses,
+      commands: {}
     }
   },
   created () {
@@ -99,6 +103,22 @@ export let ScreenApe = {
     },
     startConnection () {
       this.$connect()
+    },
+    sendCommand (name, params) {
+      params = params || {}
+      let commandId = uuidv4()
+      let command = {
+        type: 'command',
+        name: name,
+        command_id: commandId,
+        params: params
+      }
+      this.$socket.sendObj(command)
+      this.commands[commandId] = {
+        'command': command,
+        'status': 'sent',
+        'result': null
+      }
     }
   }
 }
