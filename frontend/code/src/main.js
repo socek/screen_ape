@@ -10,6 +10,7 @@ import VueNativeSock from 'vue-native-websocket'
 import App from '@/App'
 import router from '@/routing'
 import store from '@/store'
+// import ScreenApe from '@/plugin/screenape'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -22,6 +23,8 @@ Vue.component('icon', Icon)
 Vue.use(VueNativeSock, 'ws://' + window.location.hostname + '/gateway', {
   connectManually: true
 })
+
+// Vue.use(ScreenApe)
 
 /* eslint-disable no-new */
 export default new Vue({
