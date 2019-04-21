@@ -15,6 +15,8 @@ services:
     env_file: .env
     volumes:
       - ./gateway/code:/code
+    depends_on:
+      - ${RABBIT_HOST}
     labels:
       - "traefik.frontend.rule=Host:localhost;PathPrefixStrip:/gateway"
       - "traefik.port=${TORNADO_PORT:-18765}"
@@ -40,4 +42,9 @@ services:
       - "15672:15672"
     labels:
       - "traefik.enable=false"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${RABBIT_HOST}:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 

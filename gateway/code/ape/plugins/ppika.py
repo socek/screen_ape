@@ -15,14 +15,18 @@ class PikaClient(object):
 
     def connect(self):
         log.info("Connecting to RabbitMQ...")
-        host = self.settings["rabbit_host"]
-        port = self.settings["rabbit_port"]
         user = self.settings["rabbit_user"]
         password = self.settings["rabbit_password"]
 
+        parameters = dict(
+            host=self.settings["rabbit_host"],
+            port=self.settings["rabbit_port"],
+            socket_timeout=self.settings["rabbit_connecion_timeout"],
+        )
+
         try:
             credentials = PlainCredentials(user, password)
-            param = ConnectionParameters(host=host, port=port, credentials=credentials)
+            param = ConnectionParameters(**parameters)
 
             self.connection = TornadoConnection(
                 param, on_open_callback=self.on_connected
