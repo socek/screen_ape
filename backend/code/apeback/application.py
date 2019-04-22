@@ -29,9 +29,13 @@ class FragmentContext(object):
 
 
 class ScreenApeBackendConfigurator(Configurator):
+    def add_plugin(self, plugin):
+        super().add_plugin(plugin)
+        return plugin
+
     def append_plugins(self):
         self.add_plugin(SettingsPlugin("apeback.settings"))
-        self.add_plugin(PikaPlugin())
+        self.pika = self.add_plugin(PikaPlugin())
         self.add_plugin(LoggingPlugin())
 
     def __enter__(self):
@@ -40,17 +44,9 @@ class ScreenApeBackendConfigurator(Configurator):
     def __call__(self, *args):
         return FragmentContext(self, args)
 
-    def start_consumer(self):
-        plugin = self.plugins[1]
-        plugin.pika.connect()
-        connection = plugin.pika.connection
-
-        try:
-            # Loop so we can communicate with RabbitMQ
-            connection.ioloop.start()
-        except KeyboardInterrupt:
-            # Gracefully close the connection
-            connection.connection.close()
-            # Loop until we're fully closed, will stop on its own
-            connection.connection.ioloop.start()
-
+    def start_consumer(self, consumer):
+        self.start("default")
+        client = self.pika.client
+        client.connect(consumer)
+        print("Started consuming...")
+        client.channel.start_consuming()

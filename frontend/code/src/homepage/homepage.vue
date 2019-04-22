@@ -20,6 +20,10 @@
       <div v-if="status == Statuses.RUNNING">
         <div>Connection: ok</div>
         <div>Handshake: ok</div>
+
+        <b-btn variant="primary" @click="sendMessage">
+          Send Sample Message
+        </b-btn>
       </div>
 
       <div v-if="status == Statuses.DISCONNECTED || status == Statuses.ERROR">
@@ -39,6 +43,14 @@
   import {ScreenApe} from '../plugin/screenape'
 
   export default {
-    extends: ScreenApe
+    extends: ScreenApe,
+    methods: {
+      sendMessage () {
+        this.sendJSON({
+          type: 'action',
+          name: 'zupa'
+        })
+      }
+    }
   }
 </script>

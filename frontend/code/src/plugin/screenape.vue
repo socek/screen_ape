@@ -50,7 +50,7 @@ class MessageHandler {
     if (this._isConnectionRunning()) {
       if (this._isAction()) {
         this._parseAction()
-      } else if (this.isCommand()) {
+      } else if (this._isCommandStatus()) {
         this._commandStatus()
       }
     } else {

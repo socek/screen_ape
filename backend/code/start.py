@@ -1,6 +1,5 @@
 from apeback import app
-
+from apeback.consumer import controller
 
 if __name__ == "__main__":
-    app.start("default")
-    app.start_consumer()
+    app.start_consumer(controller)

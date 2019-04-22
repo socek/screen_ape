@@ -2,7 +2,7 @@ from logging import getLogger
 
 from pika import ConnectionParameters
 from pika import PlainCredentials
-from pika.adapters.tornado_connection import TornadoConnection
+from pika import BlockingConnection
 
 log = getLogger(__name__)
 
@@ -13,10 +13,11 @@ class PikaClient(object):
         self.settings = self.app.settings
         self.channel = None
 
-    def connect(self):
+    def connect(self, consumer):
         log.info("Connecting to RabbitMQ...")
         user = self.settings["rabbit_user"]
         password = self.settings["rabbit_password"]
+        queue = self.settings["backend_queue"]
 
         parameters = dict(
             host=self.settings["rabbit_host"],
@@ -28,18 +29,15 @@ class PikaClient(object):
             credentials = PlainCredentials(user, password)
             param = ConnectionParameters(**parameters)
 
-            self.connection = TornadoConnection(
-                param, on_open_callback=self.on_connected
+            self.connection = BlockingConnection(param)
+            self.channel = self.connection.channel()
+
+            self.channel.basic_consume(
+                queue=queue, auto_ack=True, on_message_callback=consumer
             )
+
         except Exception as e:
             log.error("Something went wrong with connection to RabbitMQ... %s", e)
-
-    def on_connected(self, connection):
-        """
-        When we are completely connected to rabbitmq this is called
-        """
-        log.info("Succesfully connected to rabbitmq")
-        self.channel = connection.channel()
 
 
 class PikaPlugin(object):
@@ -49,15 +47,15 @@ class PikaPlugin(object):
         called only once per process start. configurator is an object where all
         the configuratation is stored.
         """
-        self.pika = PikaClient(configurator)
+        self.client = PikaClient(configurator)
 
     def enter(self, context):
         """
         This method will be called when the Configurator will be used as context
         manager. This is the enter phase.
         """
-        context.pika = self.pika
-        context.rabbit = self.pika.channel
+        context.client = self.client
+        context.rabbit = self.client.channel
 
     def exit(self, *args, **kwargs):
         pass
