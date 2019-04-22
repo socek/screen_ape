@@ -36,15 +36,20 @@ services:
       - "traefik.port=8080"
       # - "traefik.frontend.rule=Host:localhost"
 
+  backend:
+    build: backend
+    env_file: .env
+    volumes:
+      - ./backend/code:/code
+    depends_on:
+      - ${RABBIT_HOST}
+    labels:
+      - "traefik.enable=false"
+
   mq:
     image: rabbitmq:3-management
     ports:
       - "15672:15672"
     labels:
       - "traefik.enable=false"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://${RABBIT_HOST}:15672"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
